@@ -16,7 +16,7 @@ The objective of this project is to identify the factors that contribute most to
 
 | Attribute | Value |
 |-----------|-------|
-| **Source** | Zomato Delivery Operations Analytics Dataset ((https://www.kaggle.com/datasets/saurabhbadole/zomato-delivery-operations-analytics-dataset)) |
+| **Source** | Zomato Delivery Operations Analytics Dataset (https://www.kaggle.com/datasets/saurabhbadole/zomato-delivery-operations-analytics-dataset) |
 | **Records Analyzed** | 43,853 |
 | **Late Delivery Definition** | Delivery time > 30 minutes |
 | **Late Delivery Rate** | 29.8% |
