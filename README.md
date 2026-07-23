@@ -16,7 +16,7 @@ The objective of this project is to identify the factors that contribute most to
 
 | Attribute | Value |
 |-----------|-------|
-| **Source** | Zomato Delivery Operations Analytics Dataset (Kaggle) |
+| **Source** | Zomato Delivery Operations Analytics Dataset ((https://www.kaggle.com/datasets/saurabhbadole/zomato-delivery-operations-analytics-dataset)) |
 | **Records Analyzed** | 43,853 |
 | **Late Delivery Definition** | Delivery time > 30 minutes |
 | **Late Delivery Rate** | 29.8% |
@@ -184,8 +184,8 @@ These results indicate that the identified operational factors are strong predic
 | 4 | Multiple Deliveries | Order stacking dramatically increases late deliveries |
 | 5 | Weather Conditions | Fog and cloudy weather nearly double the late delivery rate |
 | 6 | Vehicle Condition & Rider Age | Moderate impact |
-| — | Festival & Semi-Urban Areas | Results based on limited observations |
-| — | Preparation Time, Order Type, Vehicle Type | Minimal impact |
+| 7 | Festival & Semi-Urban Areas | Results based on limited observations |
+| 8 | Preparation Time, Order Type, Vehicle Type | Minimal impact |
 
 ### Key Insight
 
