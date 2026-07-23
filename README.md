@@ -1,32 +1,48 @@
 # Food Delivery — Late Delivery Root Cause Analysis
 
-A complete data analysis project investigating **why food delivery orders arrive late**, using the Zomato Delivery Operations Analytics dataset (Kaggle), turned into concrete operational recommendations and two live dashboards (HTML + Power BI).
+An end-to-end data analytics project investigating the key factors contributing to late food deliveries using the **Zomato Delivery Operations Analytics** dataset from Kaggle.
 
-> **TL;DR:** 29.8% of orders arrive late (>30 min). It's almost entirely a **traffic + distance + order-stacking** problem, compounded by weather — not a kitchen-speed problem. Full breakdown below.
+The project combines data cleaning, exploratory data analysis (EDA), feature engineering, and machine learning to identify the primary operational drivers of delivery delays and provide data-driven business recommendations.
 
 ---
 
-## 📌 Objective
+## Project Objective
 
-Identify the primary drivers of late deliveries and turn those findings into actionable recommendations for delivery operations.
+The objective of this project is to identify the factors that contribute most to late food deliveries and translate those insights into actionable recommendations for improving delivery performance.
+
+---
 
 ## Dataset
 
-| | |
-|---|---|
-| **Source** | [Zomato Delivery Operations Analytics Dataset](https://www.kaggle.com/datasets/saurabhbadole/zomato-delivery-operations-analytics-dataset) (Kaggle) |
-| **Rows analyzed** | 43,853 |
-| **Late threshold** | `Time_taken (min) > 30` |
-| **Overall late rate** | 29.8% |
-| **Avg delivery time** | 26.3 minutes |
+| Attribute | Value |
+|-----------|-------|
+| **Source** | Zomato Delivery Operations Analytics Dataset (Kaggle) |
+| **Records Analyzed** | 43,853 |
+| **Late Delivery Definition** | Delivery time > 30 minutes |
+| **Late Delivery Rate** | 29.8% |
+| **Average Delivery Time** | 26.3 minutes |
 
-Fields used: rider `Age` & `Rating`, `Weather_conditions`, `Traffic_density`, `Vehicle_condition`, `Type_of_order`, `Type_of_vehicle`, `multiple_deliveries`, `Festival`, `City`, delivery `distance` (Haversine, derived from coordinates), `Preparation_Time` (derived from timestamps), and `Time_taken`.
+### Features Used
+
+- Rider Age
+- Rider Rating
+- Weather Conditions
+- Traffic Density
+- Vehicle Condition
+- Order Type
+- Vehicle Type
+- Multiple Deliveries
+- Festival
+- City
+- Delivery Distance *(derived using the Haversine formula)*
+- Preparation Time *(derived from timestamps)*
+- Delivery Time
 
 ---
 
-## 🧭 Project Structure
+## Project Structure
 
-```
+```text
 food-delivery-delay-analysis/
 │
 ├── data/
@@ -36,16 +52,12 @@ food-delivery-delay-analysis/
 ├── notebooks/
 │   ├── data_understanding.ipynb
 │   ├── data_cleaning.ipynb
-│   ├── eda.ipynb
-│
-├── dashboard/
-│   └── powerbi_dashboard.pbix
+│   └── eda.ipynb
 │
 ├── reports/
 │   └── final_report.pdf
-│  
+│
 ├── images/
-│   └── 
 │
 ├── README.md
 └── requirements.txt
@@ -53,142 +65,178 @@ food-delivery-delay-analysis/
 
 ---
 
-## 🔬 Methodology
+## Methodology
 
-1. **Data Cleaning** — filled missing values (median for numeric, mode for categorical), computed delivery distance via the Haversine formula, derived preparation time from order/pickup timestamps, encoded categorical fields, dropped irrelevant identifier columns.
-2. **Exploratory Analysis** — univariate late-rate comparisons across every driver, bivariate/interaction analysis (traffic × weather, multiple-deliveries × traffic), and continuous trend curves (distance, age) to see effects as smooth relationships rather than fixed buckets.
-3. **Model-Based Validation** — a Random Forest classifier trained on all factors together, used to rank feature importance accounting for interactions, and to confirm the identified drivers are genuinely predictive rather than coincidental.
+### 1. Data Cleaning
+
+- Handled missing values using median (numerical) and mode (categorical)
+- Calculated delivery distance using the Haversine formula
+- Derived preparation time from order and pickup timestamps
+- Encoded categorical variables
+- Removed irrelevant identifier columns
+
+### 2. Exploratory Data Analysis
+
+- Univariate analysis of delivery delay drivers
+- Interaction analysis (Traffic × Weather, Multiple Deliveries × Traffic)
+- Trend analysis for continuous variables such as distance and rider age
+- Correlation analysis between variables
+
+### 3. Machine Learning Validation
+
+A Random Forest classifier was trained to evaluate feature importance and validate whether the observed relationships were genuinely predictive rather than coincidental.
 
 ---
 
-## 📊 Key Findings
+# Key Findings
 
-### Delivery time distribution
-Nearly a third of orders fall past the 30-minute mark — the late threshold sits right at the point where the distribution's right tail begins.
+## Delivery Time Distribution
+
+Approximately **30% of deliveries exceed the 30-minute threshold**, indicating a significant proportion of orders are delayed.
 
 ![Delivery time distribution](images/01_time_distribution.png)
 
-### Correlation overview
-`Rating` correlates negatively with delivery time; `distance`, `Traffic_density`, and `Age` correlate positively.
+---
+
+## Correlation Analysis
+
+Delivery time increases with:
+
+- Delivery distance
+- Traffic density
+- Rider age
+
+Higher rider ratings are associated with shorter delivery times.
 
 ![Correlation heatmap](images/02_correlation_heatmap.png)
 
-### Where risk compounds: traffic × weather
-This is the single most important chart in the project. Jam-level traffic combined with Fog/Cloudy weather pushes the late rate to **~75%** — far above the 29.8% baseline — while Low traffic + Sunny stays under 5%.
+---
 
-![Traffic x weather heatmap](images/03_traffic_weather_heatmap.png)
+## Traffic and Weather Interaction
 
-### Late rate vs. distance
-Late rate rises steadily as delivery distance increases, then plateaus around ~45% for longer routes.
+Traffic congestion combined with poor weather creates the highest delivery risk.
 
-![Late rate vs distance](images/04_distance_trend.png)
+- **Jam + Fog/Cloudy:** ~75% late deliveries
+- **Low Traffic + Sunny:** <5% late deliveries
 
-### Late rate vs. rider age
-A real but much weaker effect than distance or traffic.
+This interaction represents the strongest operational risk identified in the analysis.
 
-![Late rate vs age](images/05_age_trend.png)
+![Traffic × Weather](images/03_traffic_weather_heatmap.png)
 
-### Ranking every driver together
-A Random Forest trained on all factors at once — `Rating`, `Traffic_density`, and `distance` dominate; `Preparation_Time` and `Type_of_order` contribute almost nothing.
+---
+
+## Impact of Delivery Distance
+
+Late delivery probability increases steadily with delivery distance before leveling off around **45%** for the longest routes.
+
+![Distance trend](images/04_distance_trend.png)
+
+---
+
+## Rider Age
+
+Older rider age shows a moderate association with higher delivery times, although its effect is considerably smaller than traffic or distance.
+
+![Age trend](images/05_age_trend.png)
+
+---
+
+## Feature Importance
+
+The Random Forest model identified the following as the strongest predictors of late delivery:
+
+1. Rider Rating
+2. Traffic Density
+3. Delivery Distance
+4. Multiple Deliveries
+5. Weather Conditions
+
+Preparation time and order type had minimal predictive importance.
 
 ![Feature importance](images/06_feature_importance.png)
 
-### Model validation
-AUC = 0.98 confirms these drivers are strong, consistent predictors of lateness — not statistical noise. (Accuracy 93.7%, precision 98.0%, recall 80.6%.)
+---
 
-![ROC curve](images/07_roc_curve.png)
+## Model Performance
+
+The classification model achieved:
+
+| Metric | Score |
+|---------|------:|
+| Accuracy | 93.7% |
+| Precision | 98.0% |
+| Recall | 80.6% |
+| ROC-AUC | 0.98 |
+
+These results indicate that the identified operational factors are strong predictors of delivery delays.
+
+![ROC Curve](images/07_roc_curve.png)
 
 ---
 
-## 🏁 Ranked Summary of Causes
+# Root Causes of Late Deliveries
 
-| Rank | Driver | Effect |
-|---|---|---|
-| 1 | Rider rating | Strongest single signal; lower-rated riders → much higher late rates |
-| 2 | Traffic density | Jam = 50.6% late vs. Low = 7.9% late (~6-7×) |
-| 3 | Delivery distance | Strong effect, compounds sharply with traffic |
-| 4 | Order-stacking (2+ simultaneous deliveries) | ~100% late rate once combined with any traffic |
-| 5 | Weather (Fog/Cloudy vs Sunny) | Roughly doubles the late rate (~44% vs ~12%) |
-| 6 | Vehicle condition / rider age | Moderate effect |
-| — | Festival days / Semi-Urban city | Appear extreme (100% late) but rest on very small samples (857 / 156 orders) — low confidence |
-| — | Preparation time, order type, vehicle type, city | Negligible effect |
+| Rank | Factor | Impact |
+|------|--------|--------|
+| 1 | Rider Rating | Strongest predictor of delivery delay |
+| 2 | Traffic Density | Jam traffic increases late deliveries by approximately 6–7× |
+| 3 | Delivery Distance | Longer routes significantly increase delay probability |
+| 4 | Multiple Deliveries | Order stacking dramatically increases late deliveries |
+| 5 | Weather Conditions | Fog and cloudy weather nearly double the late delivery rate |
+| 6 | Vehicle Condition & Rider Age | Moderate impact |
+| — | Festival & Semi-Urban Areas | Results based on limited observations |
+| — | Preparation Time, Order Type, Vehicle Type | Minimal impact |
 
-**Bottom line:** lateness is driven by rider workload and road conditions (traffic, distance, order-stacking, weather) — not by kitchen preparation speed.
+### Key Insight
 
----
-
-## ✅ Recommendations
-
-| Cause | Recommendation | Why it works |
-|---|---|---|
-| Order-stacking under traffic | Cap simultaneous deliveries to 1 per rider once traffic is Medium+ | Removes the single worst compounding factor |
-| Traffic density | Build traffic-aware ETAs instead of a fixed average promise time | Reduces broken-promise complaints even without speed gains |
-| Weather | Auto-extend ETA buffers during Fog/Cloudy; consider incentive pay for bad-weather shifts | Manages expectations and supports retention |
-| Distance | Avoid assigning long-distance orders (15km+) to riders already carrying another order | Directly targets the highest-risk order segment |
-| Rider rating | Pair new/low-rated riders with shorter, low-traffic routes; investigate what drives low ratings | Rating may be a symptom as much as a cause — needs follow-up |
-| Preparation time | Don't prioritize kitchen-speed initiatives to fix lateness | Preparation time has almost no measurable effect |
-| Festival days / Semi-Urban | Treat as observations needing more data, not confirmed findings | Both rest on very small sample sizes |
-
-Full detail and supporting evidence for each recommendation is in [`Late_Delivery_Analysis_Report.docx`](Late_Delivery_Analysis_Report.docx).
+Late deliveries are primarily driven by **traffic conditions, delivery distance, weather, and rider workload**, rather than kitchen preparation time.
 
 ---
 
-## 📈 Dashboards
+# Business Recommendations
 
-### Interactive HTML dashboard
-A self-contained dashboard (charts, heatmaps, KPI strip) — no server required, just open the file in a browser.
-
-![Dashboard preview](images/08_dashboard_preview.png)
-
-▶️ **[Open the live dashboard](late_delivery_dashboard.html)** — or enable GitHub Pages on this repo to share it as a link instead of a download.
-
-### Power BI dashboard
-<!--
-📌 SPACE RESERVED FOR POWER BI SCREENSHOT
-Once you've built the dashboard in Power BI Desktop:
-1. File > Export > Export as image (or take a screenshot of the report page)
-2. Save it as images/09_powerbi_dashboard.png
-3. Uncomment the line below and delete this comment block
--->
-🔲 *Power BI dashboard screenshot goes here — see build steps below, then add `images/09_powerbi_dashboard.png` and swap in `![Power BI dashboard](images/09_powerbi_dashboard.png)`.*
-
-**Build steps:**
-1. Import [`food_delivery_powerbi_ready.csv`](food_delivery_powerbi_ready.csv) (`Get Data → Text/CSV`) — it already has `Age_Group`, `Distance_Bucket`, `Prep_Time_Bucket`, and readable labels pre-computed.
-2. Add measures:
-   ```DAX
-   Total Orders = COUNTROWS('Data')
-   Late Orders  = CALCULATE([Total Orders], 'Data'[late_delivery] = 1)
-   Late Rate %  = DIVIDE([Late Orders], [Total Orders])
-   Avg Delivery Time = AVERAGE('Data'[Time_taken (min)])
-   ```
-3. Add 3 Card visuals: Total Orders, Late Rate %, Avg Delivery Time.
-4. Matrix visual: rows = `Traffic_density_Label`, columns = `Weather_conditions`, values = `Late Rate %`, with a background color scale (Format → Conditional Formatting) — this is the signature compounding-risk view.
-5. Second Matrix: rows = `multiple_deliveries`, columns = `Traffic_density_Label`, same color scale.
-6. Clustered bar chart per category driver (`Weather_conditions`, `Traffic_density_Label`, `Vehicle_condition_Label`, `City`, `Age_Group`, `Type_of_order`, `Type_of_vehicle`, `Festival_Label`), sorted descending, with a constant reference line at the overall `Late Rate %`.
-7. Two more bar charts: `Distance_Bucket` vs `Late Rate %` and `Prep_Time_Bucket` vs `Late Rate %`, side by side.
-8. Slicers for `City`, `Weather_conditions`, `Festival_Label`.
-9. A text box or separate page listing the recommendations above.
+| Issue | Recommendation |
+|--------|---------------|
+| Order stacking | Limit multiple deliveries during medium or heavy traffic |
+| Traffic congestion | Implement traffic-aware ETA predictions |
+| Poor weather | Increase ETA buffers during adverse weather conditions |
+| Long-distance orders | Avoid assigning long routes to riders already carrying multiple deliveries |
+| Low rider ratings | Assign simpler routes to newer or lower-rated riders and investigate performance trends |
+| Kitchen operations | Prioritize delivery optimization over reducing preparation time |
+| Small sample categories | Collect additional data before making operational decisions |
 
 ---
 
-## 🔁 How to Reproduce
+## How to Reproduce
 
-1. Open `data_cleaning.ipynb` and run all cells (requires `kagglehub` to pull the raw dataset, or point it at a local copy).
-2. Open `EDA_completed.ipynb` and run all cells — regenerates every chart and the feature-importance ranking.
-3. Open `late_delivery_dashboard.html` directly in a browser, **or** import `food_delivery_powerbi_ready.csv` into Power BI Desktop and follow the build steps above.
+1. Run **data_cleaning.ipynb** to clean and preprocess the dataset.
+2. Run **eda.ipynb** to generate all visualizations and statistical analyses.
+3. Train the Random Forest model to reproduce the feature importance rankings and evaluation metrics.
 
-## 🛠️ Tools Used
+---
 
-`pandas` · `numpy` · `matplotlib` · `seaborn` · `scikit-learn` (Random Forest, ROC/AUC) for analysis · Power BI / HTML + Chart.js for dashboards · Word (docx) for the report.
+## Technologies Used
 
-## ⚠️ Limitations
+- Python
+- Pandas
+- NumPy
+- Matplotlib
+- Seaborn
+- Scikit-learn
+- Jupyter Notebook
 
-- Festival (857 orders) and Semi-Urban (156 orders) categories are small samples — directional, not conclusive.
-- The Random Forest is descriptive (for ranking drivers), not a tuned production model.
-- Rating's association with lateness is correlational — causality (does a low rating cause slow delivery, or reflect it?) isn't established here.
+---
 
-## 🔮 Next Steps
+## Limitations
 
-- Logistic regression for interpretable odds-ratios.
-- Regression on `Time_taken` directly to quantify minutes added per factor (not just late/on-time).
-- Live monitoring dashboard in Power BI, refreshed on a schedule.
+- Festival and Semi-Urban categories contain relatively few observations, limiting statistical confidence.
+- The Random Forest model was developed for feature importance analysis rather than production deployment.
+- Rider rating is correlated with delivery delays but should not be interpreted as a causal relationship.
+
+---
+
+## Conclusion
+
+This analysis demonstrates that delivery delays are predominantly influenced by external operational factors rather than food preparation time.
+
+Traffic congestion, delivery distance, weather conditions, and rider workload consistently emerged as the strongest predictors of late deliveries. These findings provide practical guidance for improving ETA accuracy, rider assignment strategies, and overall delivery performance.
